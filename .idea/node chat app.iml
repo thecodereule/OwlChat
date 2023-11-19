@@ -7,4 +7,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="socket.io" level="application" />
   </component>
+  <component name="SonarLintModuleSettings">
+    <option name="uniqueId" value="1be5d05c-8d46-4f2d-8d4d-45b6a76ecece" />
+  </component>
 </module>

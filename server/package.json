@@ -1,16 +1,21 @@
 {
-  "name": "web-socket-app",
+  "name": "websocket",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node ."
+    "start": "node .",
+    "dev": "nodemon ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "socket.io": "latest"
+    "socket.io": "^4.7.2"
+  },
+  "devDependencies": {
+    "cors": "^2.8.5",
+    "nodemon": "^3.0.1"
   }
 }

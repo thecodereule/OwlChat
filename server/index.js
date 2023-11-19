@@ -35,10 +35,44 @@ io.on('connection', socket => {
     console.log(`User ${socket.id} connected`)
 
     // emit message only to the user that connected
-    socket.emit('message', "Welcome to OwlChat")
+    socket.emit('message', buildMsg(ADMIN, "Welcome to the OwlChat!"))
 
-    // Upon connection to all others
-    socket.broadcast.emit('message', `User ${socket.id.substring(0, 5)} connected`)
+    socket.on('enterRoom', ({ name, room }) => {
+        // leave previous room
+        const prevRoom = getCurrentUser(socket.id)?.room
+
+        if (prevRoom) {
+            socket.leave(prevRoom)
+            io.to(prevRoom).emit('message', buildMsg(ADMIN, `${name} has left the room`))
+        }
+        const user = activateUser(socket.id, name, room)
+
+        // Can't update room before joining
+        if (prevRoom) {
+            io.to(prevRoom).emit('roomUsers', {
+                users: getRoomUsers(prevRoom)
+            })
+        }
+        // join room
+        socket.join(user.room)
+
+        // emit message to the user that connected
+        socket.emit('message', buildMsg(ADMIN, `Welcome to ${user.room}!`))
+
+        // emit message to all others
+        socket.broadcast.to(user.room).emit('message', buildMsg(ADMIN, `${user.name} has joined the room`))
+
+        // Update user list for room
+        io.to(user.room).emit('roomUsers', {
+            users: getRoomUsers(user.room)
+        })
+
+        // Update room list for everyone
+        io.emit('roomList', {
+            rooms: getRooms()
+        })
+    })
+
 
     // Listening for message event
     socket.on('message', data => {

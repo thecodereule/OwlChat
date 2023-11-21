@@ -46,14 +46,31 @@ msgInput.addEventListener('keypress', () => {
 // Listen for messages
 socket.on("message", (data) => {
     activity.textContent = ""
+    const { name, text, time } = data
     const li = document.createElement('li')
-    li.textContent = data
-    document.querySelector('ul').appendChild(li)
+    li.className = 'post'
+    if (name === nameInput.value) {
+        li.className = 'post post--left'
+    }
+    if (name !== nameInput.value && name !== "Admin") {
+        li.className = 'post post--right'
+    }
+    if (name !== 'Admin') {
+        li.innerHTML = `
+            <div class="post__header" ${ name === nameInput.value ? 'post__header--user' : 'post__header--reply'}>
+        <span class="post__header--name">${name}</span>
+        <span class="post__header--time">${time}</span>
+        </div>
+        <div class="post__text">${text}</div>`
+    }
+    else
+    {
+        li.innerHTML = `<div class="post__text">${text}</div>`
+    }
+    document.querySelector('.chat-display').appendChild(li)
+    chatDisplay.scrollTop = chatDisplay.scrollHeight
 })
 
-msgInput.addEventListener('keypress', () => {
-    socket.emit('activity', socket.id.substring(0, 5))
-})
 
 let activityTimer
 socket.on("activity", (name) => {
@@ -64,3 +81,41 @@ socket.on("activity", (name) => {
         activity.textContent = ""
     }, 1000)
 })
+
+socket.on('roomUsers', ({ users }) => {
+    showUsers(users)
+})
+socket.on('roomList', ({ rooms }) => {
+    showRooms(rooms)
+})
+
+function showUsers(users) {
+    // Clear the current users list display.
+    usersList.textContent = '';
+
+    // Check if there are any users to display.
+    if (users && users.length > 0) {
+        // Start the users list with a descriptive message.
+        let usersDisplay = `<em>Users in ${chatRoom.value}:</em> `;
+
+        // Join usernames with a comma and space, and append to the display string.
+        usersDisplay += users.map(user => user.name).join(', ');
+
+        // Set the innerHTML of the usersList element to the new users display string.
+        usersList.innerHTML = usersDisplay;
+    }
+}
+
+function showRooms(rooms)
+{
+    roomList.textContent = ''
+    if (rooms) {
+        roomList.innerHTML = `<em>Active Rooms:</em>`
+        rooms.forEach((room, i) => {
+            roomList.textContent += `${room}`
+            if (rooms.length > 1 && i !== rooms.length - 1) {
+                roomList.textContent += ","
+            }
+        })
+    }
+}
